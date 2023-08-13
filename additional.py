@@ -1,3 +1,5 @@
+# show images
+# data
 import matplotlib.pyplot as plt
 import torch
 import torchvision
@@ -16,7 +18,3 @@ def show_images(dataset, num_samples=20, cols=4):
         plt.subplot(num_samples // cols + 1, cols, i + 1)
         # plt.imshow -> display data as an image
         plt.imshow(img[0])
-
-data = torchvision.datasets.StanfordCars(root='.', download=True)
-# show_images(data)
-# pylab.show()

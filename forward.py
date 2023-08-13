@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn.functional as functional
 import pylab
+from load_dataset import load_transformed_dataset, show_tensor_image
 
 # const define
-IMG_SIZE = 64
-BATCH_SIZE = 4
+BATCH_SIZE = 128
 T = 100
 
 def linear_beta_schedule(timesteps, start=0.0001,end=0.02):
@@ -39,36 +39,6 @@ def forward_diffusion_sample(x_0, tensor, device="cpu"):
     # mean + variance
     return sqrt_alphas_cumprod_t.to(device) * x_0.to(device) + srqtOneMinusalphas_cumprod_t.to(device) * noise.to(device), noise.to(device)
 
-def load_transformed_dataset():
-    data_transforms = [
-        transforms.Resize((IMG_SIZE, IMG_SIZE)),
-        transforms.RandomHorizontalFlip(), # randomly flip and rotate
-        transforms.ToTensor(), # transform it into a torch tensor -> [0, 1]
-        transforms.Lambda(lambda t: (t*2) - 1) # [-1, 1]
-    ]
-    data_transform = transforms.Compose(data_transforms)
-
-    train = torchvision.datasets.StanfordCars(root=".", download=True, transform=data_transform)
-    test = torchvision.datasets.StanfordCars(root=".", download=True, transform=data_transform, split='test')
-
-    return torch.utils.data.ConcatDataset([train, test])
-
-def show_tensor_image(image):
-    """
-    the reverse of the load function
-    """
-    reverse_transforms = transforms.Compose([
-        transforms.Lambda(lambda t: (t+1)/2),
-        transforms.Lambda(lambda t: t.permute(1, 2, 0)),
-        transforms.Lambda(lambda t: t *255),
-        transforms.Lambda(lambda t: t.numpy().astype(np.uint8)),
-        transforms.ToPILImage()
-    ])
-
-    if len(image.shape) == 4:
-        image = image[0, :, :, :]
-    plt.imshow(reverse_transforms(image))
-
 
 """
 initialize parameters (beta, alpha, etc.)
@@ -78,8 +48,8 @@ initialize parameters (beta, alpha, etc.)
 pre-calculate values used in the forward pass
 """
 # assign a T value -> timesteps
-betas = linear_beta_schedule(timesteps=T)
 
+betas = linear_beta_schedule(timesteps=T)
 alphas = 1.0 - betas
 alphas_cumprod = torch.cumprod(alphas, dim=0)
 alphas_cumprod_prev = functional.pad(alphas_cumprod[:-1], (1,0), value=1.0)

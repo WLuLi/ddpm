@@ -1,11 +1,10 @@
-from forward import forward_diffusion_sample,  show_tensor_image, get_index_from_list, IMG_SIZE, T, betas, sqrt_one_minus_alphas_cumprod, sqrt_recip_alphas, posterior_variance
-from backward import SimpleUNet
+from forward import forward_diffusion_sample,  show_tensor_image, get_index_from_list, T, betas, sqrt_one_minus_alphas_cumprod, sqrt_recip_alphas, posterior_variance
+from Unet import SimpleUNet
+from load_dataset import IMG_SIZE
 import torch.nn.functional as functional
 import matplotlib.pyplot as plt
 import torch
-
-device = "cuda"
-model = SimpleUNet()
+from model_init import device, model
 
 """
 loss -> L1 loss between noise and noise prediction, calculate noise by calling forward_diffusion_sample(image + timestep->new image and noise) every time
@@ -50,7 +49,7 @@ def sample_plot_image():
     # Sample noise
     img_size = IMG_SIZE
     img = torch.randn((1, 3, img_size, img_size), device=device)
-    plt.figure(figsize=(15,15))
+    plt.figure(figsize=(32,32))
     plt.axis('off')
     num_images = 10
     stepsize = int(T/num_images)
